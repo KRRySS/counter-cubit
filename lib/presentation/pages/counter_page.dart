@@ -1,37 +1,28 @@
-import 'package:counter_pure_bloc/presentation/bloc/counter_bloc.dart';
-import 'package:counter_pure_bloc/presentation/bloc/counter_event.dart';
+import 'package:counter_bloc/presentation/bloc/counter_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class CounterPage extends StatefulWidget {
-  CounterPage({Key key, this.title}) : super(key: key);
+import '../bloc/counter_bloc.dart';
+import '../bloc/counter_event.dart';
+
+class CounterPage extends StatelessWidget {
   final String title;
 
-  @override
-  _CounterPageState createState() => _CounterPageState();
-}
+  CounterPage({this.title});
 
-class _CounterPageState extends State<CounterPage> {
-  final CounterBloc _counterBloc = CounterBloc();
-
-  void _incrementCounter() {
-    _counterBloc.eventSink.add(IncrementEvent());
+  void _incrementCounter(BuildContext context) {
+    context.read<CounterBloc>()..onIncrement();
   }
 
-  void _decrementCounter() {
-    _counterBloc.eventSink.add(DecrementEvent());
-  }
-
-  @override
-  void dispose() {
-    _counterBloc.dispose();
-    super.dispose();
+  void _decrementCounter(BuildContext context) {
+    context.read<CounterBloc>()..onDecrement();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
       ),
       body: Center(
         child: Column(
@@ -40,12 +31,17 @@ class _CounterPageState extends State<CounterPage> {
             Text(
               'You have pushed the button this many times:',
             ),
-            StreamBuilder<int>(
-              stream: _counterBloc.counter,
-              initialData: 0,
-              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+            BlocConsumer<CounterBloc, CounterState>(
+              listener: (context, state) {
+                if (state is IncrementEvent) {
+                  print("Increment counter");
+                } else if (state is DecrementEvent) {
+                  print("Decrement counter");
+                }
+              },
+              builder: (context, state) {
                 //get the data
-                final counter = snapshot.data;
+                final counter = state.counter;
                 return Text(
                   '$counter',
                   style: Theme.of(context).textTheme.headline4,
@@ -55,22 +51,21 @@ class _CounterPageState extends State<CounterPage> {
           ],
         ),
       ),
-      floatingActionButton:
-          _buildButtons(), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: _buildButtons(context),
     );
   }
 
-  Row _buildButtons() {
+  Row _buildButtons(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         FloatingActionButton(
-          onPressed: _decrementCounter,
+          onPressed: () => _decrementCounter(context),
           tooltip: 'Decrement',
           child: Icon(Icons.remove),
         ),
         FloatingActionButton(
-          onPressed: _incrementCounter,
+          onPressed: () => _incrementCounter(context),
           tooltip: 'Increment',
           child: Icon(Icons.add),
         ),
