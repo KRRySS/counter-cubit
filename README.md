@@ -1,46 +1,34 @@
 ## Architecture overview
-Very simple example of BLoC architecture pattern without Flutter BLoC dependencies like [flutter_bloc](https://pub.dev/packages/flutter_bloc) (in the result with many boilerplate code) on popular Counter initial app.
-I use [StreamBuilder](https://api.flutter.dev/flutter/widgets/StreamBuilder-class.html), [StreamController](https://api.flutter.dev/flutter/dart-async/StreamController-class.html), [Stream](https://api.flutter.dev/flutter/dart-async/Stream-class.html) and [Sink](https://api.flutter.dev/flutter/dart-core/Sink-class.html) to preparing sample BLoC abstraction and showing how it can works "under the hood" without popular libraries:
-- stream management for events:
+This project is a fork from [counter-pure-bloc](https://github.com/KRRySS/counter-pure-bloc) It's very simple example of BLoC architecture pattern based on [flutter_bloc](https://pub.dev/packages/flutter_bloc).
+- stream management for events has hidden implementation,
+- BLoC gives us opportunity to observe all bloc instances using BlocObserver,
+- adding new events to BLoC:
 ```dart
-  final _eventController = StreamController<CounterEvent>();
-  Stream<CounterEvent> get eventStream => _eventController.stream;
-  Sink<CounterEvent> get eventSink => _eventController.sink;
+  context.read<CounterBloc>()..onIncrement();
 
-```
-- stream management for counter:
-```dart
-  final _counterController = StreamController<int>();
-  Stream<int> get counter => _counterController.stream;
-  StreamSink<int> get _inCounter => _counterController.sink;
-
-```
-- adding new evnets to sink:
-```dart
-  _counterBloc.eventSink.add(IncrementEvent());
-
-```
-- mapping events to state:
-```dart
-  CounterBloc() {
-    eventStream.listen(_mapEventToState);
-  }
-
-  void _mapEventToState(event) {
-    if (event is IncrementEvent)
-      ++_counter;
-    else if (event is DecrementEvent) --_counter;
-    _inCounter.add(_counter);
+  void onIncrement() {
+    add(IncrementEvent());
   }
 
 ```
-- returning widgets and capturing snapshots of received stream data:
+- overridden method which mapping events to state:
 ```dart
-  StreamBuilder<int>(
-    stream: _counterBloc.counter,
-    initialData: 0,
-    builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-      final counter = snapshot.data;
+  @override
+  Stream<CounterState> mapEventToState(CounterEvent event) async* {
+    if (event is IncrementEvent) {
+      yield CounterState(counter: state.counter + 1);
+    } else if (event is DecrementEvent) {
+      yield CounterState(counter: state.counter - 1);
+    }
+  }
+
+```
+- returning widgets and capturing state from BLoC using BlocBuilder (or BlocListener for no side effects):
+```dart
+  BlocBuilder<CounterBloc, CounterState>(
+    builder: (context, state) {
+      //get the data
+      final counter = state.counter;
       return Text(
         '$counter',
         style: Theme.of(context).textTheme.headline4,
@@ -49,14 +37,7 @@ I use [StreamBuilder](https://api.flutter.dev/flutter/widgets/StreamBuilder-clas
   ),
 
 ```
-- closing all stream for preventing memory leaks:
-```dart
-  dispose() {
-    _eventController.close();
-    _counterController.close();
-  }
-
-```
+- closing all stream manually for preventing memory leaks is not necessary
 
 
 <br />
@@ -64,4 +45,4 @@ I use [StreamBuilder](https://api.flutter.dev/flutter/widgets/StreamBuilder-clas
 
 ![alt text][architecture]
 
-[architecture]: https://koenig-media.raywenderlich.com/uploads/2020/08/04-BLoC-diagram-1.png "BLoC pattern, resource: https://www.raywenderlich.com/4074597-getting-started-with-the-bloc-pattern"
+[architecture]: https://miro.medium.com/max/1360/0*-vqhX7Z7wdxw9xSc "BLoC architecture, resource: https://miro.medium.com/max/1360/0*-vqhX7Z7wdxw9xSc"
