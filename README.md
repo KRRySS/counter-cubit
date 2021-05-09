@@ -1,6 +1,6 @@
 ## Architecture overview
 This project is a fork from [counter-pure-bloc](https://github.com/KRRySS/counter-pure-bloc) It's very simple example of BLoC architecture pattern based on [flutter_bloc](https://pub.dev/packages/flutter_bloc).
-- stream management for events has hidden implementation,
+- stream management for events has hidden implementation and reduces boilerplate code,
 - BLoC gives us opportunity to observe all bloc instances using BlocObserver,
 - adding new events to BLoC:
 ```dart
