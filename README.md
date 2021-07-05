@@ -23,30 +23,3 @@ This project is a fork from [counter-bloc](https://github.com/KRRySS/counter-blo
   ),
 
 ```
-
-
-# fl_template
-
-## Getting Started
-
-This project is a starting point for a lm_monitor_cs application.
-
-## Install lefthook
-Firstly, we need to install lefthook globally. Based on your environment, there are a few options
-- If you have Node.js installed:
-```console
-npm install -g @arkweid/lefthook
-```
-
-- If you’re in a Ruby-based environment:
-```console
-gem install lefthook
-```
-You may need to run these commands as sudo
-
-## Boostratping lm_monitor_cs project
-Run below script in main root after checkout this repo:
-```console
-./bootstrap.sh
-```
-This is work-around for maven_repository_v2 accessibility from local filesystem
